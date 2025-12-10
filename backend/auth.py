@@ -1,22 +1,12 @@
 import bcrypt
+from models import User
 
-fake_users_db = {
-    "test@example.com": {
-        "email": "test@example.com",
-        "password": bcrypt.hashpw("test1234".encode('utf-8'), bcrypt.gensalt())
-    }
-}
-
-def get_email(db, email: str):
-    if email in db:
-        return db[email] 
-
-def authenticate_user(fake_db, email: str, password: str):
-    user = get_email(fake_db, email)
+def authenticate_user(db, email: str, password: str):
+    user = db.query(User).filter(User.email == email).first()
     if not user:
         return {"ok": False, "reason": "invalid_credentials"}
 
-    stored_hash = user["password"]
+    stored_hash = user.hashed_password.encode('utf-8')
     password_bytes = password.encode('utf-8')
 
     try:
@@ -29,19 +19,21 @@ def authenticate_user(fake_db, email: str, password: str):
 
     return {"ok": True, "user": user}
 
-def register_user(fake_db, email: str, password: str):
-    user = get_email(fake_db, email)
+def register_user(db, email: str, password: str):
+    user = db.query(User).filter(User.email == email).first()
     if user:
         return {"ok": False, "reason": "email_already_exists"}
     
     # Validation already handled by Pydantic in RegisterSchema
     hashed_password = hash_password(password)
-    new_user = {"email": email, "password": hashed_password}
-    fake_db[email] = new_user
+    new_user = User(email=email, hashed_password=hashed_password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
     return {"ok": True, "user": new_user}
 
 def hash_password(password: str):
     password_bytes = password.encode('utf-8')
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password_bytes, salt)
-    return hashed_password
+    return hashed_password.decode('utf-8')

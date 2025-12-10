@@ -1,7 +1,9 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from auth import fake_users_db, authenticate_user, register_user
+from auth import authenticate_user, register_user
+from database import get_db, engine
 from schemas import LoginSchema, RegisterSchema
+from sqlalchemy.orm import Session
 
 app = FastAPI()
 
@@ -23,8 +25,8 @@ async def root():
     return {"message": "Hi"}
 
 @app.post("/login", status_code=status.HTTP_200_OK)
-def login(data: LoginSchema):
-    result = authenticate_user(fake_users_db, data.email, data.password)
+def login(data: LoginSchema, db: Session = Depends(get_db)):
+    result = authenticate_user(db, data.email, data.password)
 
     if not result["ok"]:
         raise HTTPException(
@@ -37,12 +39,12 @@ def login(data: LoginSchema):
     return {
         "success": True,
         "message": "Logged in",
-        "email": user["email"],
+        "email": user.email,
     }
 
 @app.post("/register", status_code=status.HTTP_201_CREATED)
-def register(data: RegisterSchema):
-    result = register_user(fake_users_db, data.email, data.password)
+def register(data: RegisterSchema, db: Session = Depends(get_db)):
+    result = register_user(db, data.email, data.password)
 
     if not result["ok"]:
         reason = result.get("reason", "unknown")
@@ -63,6 +65,6 @@ def register(data: RegisterSchema):
     return {
         "success": True,
         "message": "Account created",
-        "email": user["email"],
+        "email": user.email,
     }
     
