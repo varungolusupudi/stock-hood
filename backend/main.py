@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from auth import authenticate_user, register_user
+from jwt_utils import create_access_token, get_current_user
 from database import get_db, engine
 from schemas import LoginSchema, RegisterSchema
 from sqlalchemy.orm import Session
+from models import User
 
 app = FastAPI()
 
@@ -35,10 +37,11 @@ def login(data: LoginSchema, db: Session = Depends(get_db)):
         )
     
     user = result["user"]
+    access_token = create_access_token(user.email)
 
     return {
-        "success": True,
-        "message": "Logged in",
+        "access_token": access_token,
+        "token_type": "bearer",
         "email": user.email,
     }
 
@@ -61,10 +64,17 @@ def register(data: RegisterSchema, db: Session = Depends(get_db)):
             )
     
     user = result["user"]
+    access_token = create_access_token(user.email)
 
     return {
-        "success": True,
-        "message": "Account created",
+        "access_token": access_token,
+        "token_type": "bearer",
         "email": user.email,
     }
-    
+
+@app.get("/dashboard")
+def dashboard(current_user: User = Depends(get_current_user)):
+    return {
+        "message": f"Hello {current_user.email}",
+        "created_at": current_user.created_at
+    }
