@@ -1,9 +1,11 @@
 "use client";
 import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation'
 
 export default function LoginForm() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const router = useRouter();
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -41,6 +43,8 @@ export default function LoginForm() {
                 }
             } else {
                 setSuccess(data.message || "Logged in successfully!");
+                const token = data.access_token;
+                router.push('/dashboard');
             }
 
             console.log("Response:", data);
