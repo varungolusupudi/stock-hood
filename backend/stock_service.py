@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import yfinance as yf
 from models import Stock
+from sqlalchemy import or_
 
 
 def fetch_ticker(db, ticker: str):
@@ -47,5 +48,10 @@ def is_fresh(last_updated: datetime, max_age_minutes: int = 10):
     age = datetime.utcnow() - last_updated
     return age < timedelta(minutes=max_age_minutes)
     
-
-
+def search_tickers(db, query: str, limit: int = 10):
+    return db.query(Stock).filter(
+        or_(
+            Stock.ticker.ilike(f"{query}%"),
+            Stock.company_name.ilike(f"%{query}%")
+        )
+    ).limit(limit).all()

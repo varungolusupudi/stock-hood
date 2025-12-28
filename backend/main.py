@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from auth import authenticate_user, register_user
-from stock_service import fetch_ticker
+from stock_service import fetch_ticker, search_tickers
 from jwt_utils import create_access_token, get_current_user
 from database import get_db, engine
 from schemas import LoginSchema, RegisterSchema
@@ -79,6 +79,13 @@ def dashboard(current_user: User = Depends(get_current_user)):
         "message": f"Hello {current_user.email}",
         "created_at": current_user.created_at
     }
+
+@app.get("/stocks/search")
+def search_ticker(q: str, db: Session = Depends(get_db)):
+    print(f"Searching for: {q}") 
+    results = search_tickers(db, q)
+    print(f"Found {len(results)} results") 
+    return {"results": results}
 
 @app.get("/stocks/{ticker}")
 def get_ticker(ticker: str, db: Session = Depends(get_db)):
