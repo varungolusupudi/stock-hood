@@ -5,7 +5,7 @@ export default function GridBackground() {
             <div 
                 className="absolute inset-0 z-0"
                 style={{
-                    background: 'linear-gradient(to bottom, #E3F2FD 0%, #E8F4FD 25%, #F0F8FF 50%, #F8FBFF 75%, #FFFFFF 100%)'
+                    background: 'linear-gradient(to bottom, #F5F4F0 0%, #F7F6F2 25%, #FAF9F6 50%, #FCFBF9 75%, #FFFFFF 100%)'
                 }}
             />
             {/* Animated Grid Layer */}

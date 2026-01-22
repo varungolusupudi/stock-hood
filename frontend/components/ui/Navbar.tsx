@@ -3,32 +3,32 @@ import Image from 'next/image';
 
 export default function NavBar() {
     return (
-        <nav className="bg-[#DEDAE7] w-full px-8 py-4 shadow-md">
+        <nav className="w-full px-4 md:px-8 py-4 md:py-5 bg-transparent">
             <div className="flex items-center justify-between max-w-7xl mx-auto">
                 {/* Logo Section */}
                 <div className="flex items-center gap-3">
-                    <Image 
-                        src="/stock-hood-logo.png" 
-                        width={200} 
-                        height={200} 
-                        alt="Stock hood logo"
-                    />
+                    <span className="text-lg md:text-xl font-semibold tracking-tight text-stone-800">StockHood</span>
                 </div>
 
-                {/* Search Bar */}
-                <div className="flex-1 max-w-xl mx-8">
+                {/* Search Bar - hidden on mobile */}
+                <div className="hidden md:block flex-1 max-w-md mx-12">
                     <SearchBar />
                 </div>
 
-                {/* Navigation Links */}
-                <ul className="flex items-center gap-8">
-                    <li className="text-gray-700 font-medium hover:text-purple-700 cursor-pointer transition-colors duration-200">
+                {/* Navigation Links - hidden on mobile */}
+                <ul className="hidden md:flex items-center gap-6">
+                    <li className="text-sm text-stone-600 hover:text-stone-900 cursor-pointer transition-colors duration-200">
                         Trending
                     </li>
-                    <li className="text-gray-700 font-medium hover:text-purple-700 cursor-pointer transition-colors duration-200">
+                    <li className="text-sm text-stone-600 hover:text-stone-900 cursor-pointer transition-colors duration-200">
                         Earnings
                     </li>
                 </ul>
+
+                {/* Mobile: Get Started button */}
+                <button className="md:hidden px-4 py-2 bg-stone-800 rounded-lg text-white text-sm font-medium">
+                    Get Started
+                </button>
             </div>
         </nav>
     );
