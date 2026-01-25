@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float, ForeignKey, Text, Enum, UniqueConstraint
-from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
 import enum
@@ -12,7 +11,7 @@ class SentimentEnum(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)  # Automatically indexed
     email = Column(String, unique=True, index=True)
     username = Column(String, unique=True, index=True, nullable=True)  # For @mentions and profile URLs
     display_name = Column(String, nullable=True)
@@ -22,16 +21,11 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     is_active = Column(Boolean, default=True)
-    
-    # Relationships
-    posts = relationship("Post", back_populates="author", foreign_keys="Post.user_id")
-    likes = relationship("PostLike", back_populates="user")
-    reposts = relationship("Post", back_populates="reposter", foreign_keys="Post.repost_of_id")
 
 class Stock(Base):
     __tablename__ = "stock"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)  # Automatically indexed
     ticker = Column(String, unique=True, index=True)
     company_name = Column(String)
     current_price = Column(Float)
@@ -45,26 +39,56 @@ class Stock(Base):
 class Post(Base):
     __tablename__ = "posts"
 
-    id = Column(Integer, primary_key=True, index=True)
-    content = Column(String)
+    id = Column(Integer, primary_key=True)  # Automatically indexed
+    content = Column(Text)  # Text allows longer posts
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)  # Index for queries like "get all posts by user X"
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    # For threading/comments
+    parent_post_id = Column(Integer, ForeignKey("posts.id"), nullable=True, index=True)  # Index for "get all comments on post X"
+    
+    # For reposts
+    repost_of_id = Column(Integer, ForeignKey("posts.id"), nullable=True, index=True)  # Index for "get all reposts of post X"
+    
+    # Sentiment (NULL = neutral, user didn't pick)
+    sentiment = Column(Enum(SentimentEnum), nullable=True)
+    
+    # Cached counts for performance
     likes_count = Column(Integer, default=0)
     comments_count = Column(Integer, default=0)
     reposts_count = Column(Integer, default=0)
-
-    post_sentiment = Column(Enum(SentimentEnum), default=SentimentEnum.NEUTRAL)
+    
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)  # Index for sorting by date
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class PostLike(Base):
     __tablename__ = "post_likes"
+    
+    id = Column(Integer, primary_key=True)  # Automatically indexed
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)  # Index for "get all posts liked by user X"
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False, index=True)  # Index for "get all likes on post X"
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Prevent same user from liking a post twice
+    __table_args__ = (UniqueConstraint('user_id', 'post_id', name='unique_user_post_like'),)
+    
 
 class PostStockMention(Base):
     __tablename__ = "post_stock_mentions"
-    id = Column(Integer, primary_key=True, index=True)
-    post_id = Column(Integer, ForeignKey("posts.id"))
-    stock_id = Column(Integer, ForeignKey("stock.id"))
+    
+    id = Column(Integer, primary_key=True)  # Automatically indexed
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False, index=True)  # Index for "get all stocks mentioned in post X"
+    stock_id = Column(Integer, ForeignKey("stock.id"), nullable=False, index=True)  # Index for "get all posts about stock X"
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class PostAttachment(Base):
     __tablename__ = "post_attachments"
+    
+    id = Column(Integer, primary_key=True)  # Automatically indexed
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False, index=True)  # Index for "get all attachments for post X"
+    file_url = Column(String, nullable=False)  # S3/Cloudinary URL
+    file_type = Column(String)  # 'image/png', 'image/jpeg', 'video/mp4'
+    file_size = Column(Integer)  # in bytes
+    width = Column(Integer, nullable=True)  # image dimensions
+    height = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)

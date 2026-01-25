@@ -1,12 +1,13 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from auth import authenticate_user, register_user
-from stock_service import fetch_ticker, search_tickers
+from services.stock_service import fetch_ticker, search_tickers
 from jwt_utils import create_access_token, get_current_user
 from database import get_db, engine
-from schemas import LoginSchema, RegisterSchema
+from schemas import LoginSchema, RegisterSchema, CreatePostSchema
 from sqlalchemy.orm import Session
 from models import Stock, User
+from services import post_service
 
 app = FastAPI()
 
@@ -101,3 +102,14 @@ def get_ticker(ticker: str, db: Session = Depends(get_db)):
     return {
         "stock": stock
     }
+
+@app.post("/posts")
+def create_post(data: CreatePostSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        post = post_service.create_post(data, current_user, db)
+        return post
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
