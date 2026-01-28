@@ -44,6 +44,7 @@ export default function LoginForm() {
             } else {
                 setSuccess(data.message || "Logged in successfully!");
                 const token = data.access_token;
+                localStorage.setItem("token", token); // Store the token!
                 router.push('/dashboard');
             }
 

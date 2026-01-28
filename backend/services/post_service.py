@@ -22,7 +22,6 @@ def create_post(data: CreatePostSchema, user: User, db: Session):
     post = Post(
         content=data.content or "",
         user_id=user.id,
-        attachments=data.attachments,
         sentiment=data.sentiment,
         parent_post_id=data.parent_post_id,
         repost_of_id=data.repost_of_id

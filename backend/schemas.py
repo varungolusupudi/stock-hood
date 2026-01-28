@@ -1,5 +1,6 @@
 import re
-from pydantic import BaseModel, EmailStr, Field, field_validator, List, Optional
+from pydantic import BaseModel, EmailStr, Field, field_validator
+from typing import List, Optional
 from models import SentimentEnum
 
 class LoginSchema(BaseModel):

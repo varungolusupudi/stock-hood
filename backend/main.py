@@ -100,7 +100,7 @@ def get_ticker(ticker: str, db: Session = Depends(get_db)):
     stock = result["stock"]
 
     return {
-        "stock": stock
+        "stock": stock 
     }
 
 @app.post("/posts")
