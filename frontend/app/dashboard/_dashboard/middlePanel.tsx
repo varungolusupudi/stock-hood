@@ -60,7 +60,7 @@ export default function MiddlePanel() {
                                     sentiment === "bullish" 
                                         ? "bg-green-600 text-white shadow-md" 
                                         : "bg-green-50 text-green-700 hover:bg-green-100"
-                                } rounded-full text-xs font-semibold py-2 px-4 transition-all duration-200`}
+                                } rounded-full text-xs font-semibold py-2 px-4 transition-all duration-200 cursor-pointer`}
                             >
                                 Bullish
                             </button>
@@ -71,7 +71,7 @@ export default function MiddlePanel() {
                                     sentiment === "bearish" 
                                         ? "bg-red-600 text-white shadow-md" 
                                         : "bg-red-50 text-red-700 hover:bg-red-100"
-                                } rounded-full text-xs font-semibold py-2 px-4 transition-all duration-200`}
+                                } rounded-full text-xs font-semibold py-2 px-4 transition-all duration-200 cursor-pointer`}
                             >
                                 Bearish
                             </button>
@@ -80,7 +80,7 @@ export default function MiddlePanel() {
                         {/* Post Button */}
                         <button 
                             type="submit" 
-                            className="bg-stone-900 hover:bg-stone-800 text-white rounded-full text-sm font-semibold py-2 px-6 transition-colors shadow-sm"
+                            className="bg-stone-900 hover:bg-stone-800 text-white rounded-full text-sm font-semibold py-2 px-6 transition-colors shadow-sm cursor-pointer"
                         >
                             Post
                         </button>

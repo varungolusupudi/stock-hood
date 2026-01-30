@@ -17,7 +17,7 @@ export default function Stock({ params }: { params: Promise<{ ticker: string }> 
     const [stockData, setStockData] = useState<StockData | null>(null);
 
     useEffect(() => {
-        fetch(`http://localhost:8000/stocks/${ticker}`)
+        fetch(`http://127.0.0.1:8000/stocks/${ticker}`)
         .then(res => res.json())
         .then(data => {
             console.log("Received data:", data);
