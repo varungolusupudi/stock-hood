@@ -1,10 +1,6 @@
 from schemas import CreatePostSchema
-from models import PostStockMention, PostAttachment, Stock
+from models import PostStockMention, PostAttachment, Stock, Post, User
 from sqlalchemy.orm import Session
-from database import get_db
-from models import Post
-from jwt_utils import get_current_user
-from models import User
 
 def create_post(data: CreatePostSchema, user: User, db: Session):
     if data.parent_post_id:

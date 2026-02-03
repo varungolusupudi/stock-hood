@@ -4,10 +4,10 @@ from auth import authenticate_user, register_user
 from services.stock_service import fetch_ticker, search_tickers
 from jwt_utils import create_access_token, get_current_user
 from database import get_db, engine
-from schemas import LoginSchema, RegisterSchema, CreatePostSchema
+from schemas import LoginSchema, RegisterSchema, CreatePostSchema, AddToWatchlistSchema
 from sqlalchemy.orm import Session
 from models import Stock, User
-from services import post_service
+from services import post_service, user_watchlist_service
 
 app = FastAPI()
 
@@ -113,3 +113,32 @@ def create_post(data: CreatePostSchema, db: Session = Depends(get_db), current_u
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 
+@app.post("/watchlist")
+def add_to_watchlist(data: AddToWatchlistSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        user_watchlist_service.add_to_watchlist(data.ticker, current_user, db)
+        return {"message": f"Added {data.ticker} to watchlist"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/watchlist")
+def get_watchlist(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        watchlist = user_watchlist_service.get_watchlist(current_user, db)
+        return {"watchlist": watchlist}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.delete("/watchlist/{ticker}")
+def remove_from_watchlist(ticker: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        user_watchlist_service.remove_from_watchlist(ticker, current_user, db)
+        return {"message": f"Removed {ticker} from watchlist"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")

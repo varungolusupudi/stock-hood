@@ -92,3 +92,15 @@ class PostAttachment(Base):
     width = Column(Integer, nullable=True)  # image dimensions
     height = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class UserWatchlist(Base):
+    __tablename__ = "user_watchlists"
+
+    id = Column(Integer, primary_key=True)
+    stock_id = Column(Integer, ForeignKey("stock.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    added_at = Column(DateTime, default=datetime.utcnow)
+
+    # Prevent duplicate watchlist entries for the same stock and user
+    __table_args__ = (UniqueConstraint('user_id', 'stock_id', name='unique_user_stock_watchlist'),)
+

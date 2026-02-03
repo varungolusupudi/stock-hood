@@ -75,3 +75,11 @@ class CreatePostSchema(BaseModel):
         if v and info.data.get('parent_post_id'):
             raise ValueError('Cannot create a post that is both a comment and a repost')
         return v
+
+class AddToWatchlistSchema(BaseModel):
+    ticker: str = Field(min_length=1, max_length=5)
+
+    @field_validator('ticker')
+    @classmethod
+    def uppercase_ticker(cls, v):
+        return v.upper()
