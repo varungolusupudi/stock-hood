@@ -2,6 +2,33 @@ from schemas import CreatePostSchema
 from models import PostStockMention, PostAttachment, Stock, Post, User
 from sqlalchemy.orm import Session
 
+def get_posts(db: Session, limit: int = 25):
+    results = (
+        db.query(Post, User)
+        .join(User, Post.user_id == User.id)
+        .order_by(Post.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    return [
+        {
+            "id": post.id,
+            "content": post.content,
+            "sentiment": post.sentiment,
+            "likes_count": post.likes_count,
+            "comments_count": post.comments_count,
+            "reposts_count": post.reposts_count,
+            "created_at": post.created_at,
+            "author": {
+                "id": user.id,
+                "username": user.username,
+                "display_name": user.display_name,
+                "profile_image_url": user.profile_image_url
+            }
+        }
+        for post, user in results
+    ]
+
 def create_post(data: CreatePostSchema, user: User, db: Session):
     if data.parent_post_id:
         parent_post = db.query(Post).filter(Post.id == data.parent_post_id).first()

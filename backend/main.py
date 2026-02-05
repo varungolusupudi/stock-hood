@@ -103,6 +103,16 @@ def get_ticker(ticker: str, db: Session = Depends(get_db)):
         "stock": stock 
     }
 
+@app.get("/posts")
+def get_posts(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        posts = post_service.get_posts(db)
+        return {"posts": posts}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 @app.post("/posts")
 def create_post(data: CreatePostSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
