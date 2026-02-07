@@ -106,7 +106,7 @@ def get_ticker(ticker: str, db: Session = Depends(get_db)):
 @app.get("/posts")
 def get_posts(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
-        posts = post_service.get_posts(db)
+        posts = post_service.get_posts(db, current_user)
         return {"posts": posts}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -118,6 +118,35 @@ def create_post(data: CreatePostSchema, db: Session = Depends(get_db), current_u
     try:
         post = post_service.create_post(data, current_user, db)
         return post
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.post("/posts/{post_id}/like")
+def like_post(post_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        return post_service.like_post(post_id, current_user, db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/posts/{post_id}/comments")
+def get_comments_on_post(post_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        comments = post_service.get_comments_on_post(post_id, db, current_user)
+        return {"comments": comments}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.post("/posts/{post_id}/comment")
+def comment_on_post(post_id: int, data: CreatePostSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        comment = post_service.comment_on_post(post_id, data, current_user, db)
+        return {"message": f"Commented on post {post_id}", "comment": comment}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:

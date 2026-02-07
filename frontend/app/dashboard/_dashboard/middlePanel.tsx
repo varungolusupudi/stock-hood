@@ -9,6 +9,7 @@ interface Post {
     reposts_count: number,
     comments_count: number,
     created_at: string,
+    user_has_liked: boolean,
     author: {
         id: number,
         username: string,
@@ -59,6 +60,28 @@ export default function MiddlePanel() {
 
             form.reset();
             setSentiment(null);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function handleLike(postId: number) {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/posts/${postId}/like`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+            const data = await response.json();
+            console.log("Response:", data);
+            setFeedPosts(prevPosts => 
+                prevPosts.map(post => 
+                    post.id === postId 
+                        ? { ...post, user_has_liked: data.liked, likes_count: data.likes_count }
+                        : post
+                )
+            );
         } catch (error) {
             console.error(error);
         }
@@ -163,7 +186,9 @@ export default function MiddlePanel() {
                                     <span className="font-medium">{post.comments_count}</span>
                                 </button>
                                 
-                                <button className="flex items-center gap-1.5 hover:text-red-500 transition-colors">
+                                <button onClick={() => handleLike(post.id)} className={`flex items-center gap-1.5 transition-colors ${
+                                    post.user_has_liked ? 'text-red-500' : 'hover:text-red-500'
+                                } cursor-pointer`}>
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
