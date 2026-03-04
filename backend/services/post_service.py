@@ -192,8 +192,10 @@ def comment_on_post(post_id: int, data: CreatePostSchema, user: User, db: Sessio
     return comment
 
 def get_user_activity(user: User, db: Session):
-    #TODO Implement this to get the user's posts and comments
-    posts_by_user = db.query(Post).filter(Post.user_id == user.id).filter(Post.parent_post_id.is_(None)).all()
-    posts_by_user_ids = [post.id for post in posts_by_user]
-    comments_by_user = db.query(Post).filter(Post.parent_post_id == post_id).filter(Post.user_id == user.id).all()
-    pass
+    all_user_posts = db.query(Post).filter(Post.user_id == user.id).all()
+    posts = [post for post in all_user_posts if post.parent_post_id is None]
+    comments = [post for post in all_user_posts if post.parent_post_id is not None]
+    return {
+        "posts": posts,
+        "comments": comments
+    }
