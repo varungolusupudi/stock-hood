@@ -20,14 +20,14 @@ interface Post {
     }
 }
 
-export default function MiddlePanel() {
+export default function MiddlePanel({refreshKey}: {refreshKey: number}) {
     const [sentiment, setSentiment] = useState<string | null>(null);
     const [feedPosts, setFeedPosts] = useState<Post[]>([]);
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [comments, setComments] = useState<Post[]>([]);
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/posts", {
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/posts`, {
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
             }
@@ -39,7 +39,7 @@ export default function MiddlePanel() {
         .catch(error => {
             console.error("Error fetching posts:", error);
         });
-    }, []);
+    }, [refreshKey]);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -48,7 +48,7 @@ export default function MiddlePanel() {
         const post = formData.get("post");
         
         try {
-            const response = await fetch("http://127.0.0.1:8000/posts", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/posts`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -64,6 +64,7 @@ export default function MiddlePanel() {
 
             form.reset();
             setSentiment(null);
+            setFeedPosts(prevPosts => [data.post, ...prevPosts]);
         } catch (error) {
             console.error(error);
         }
@@ -71,7 +72,7 @@ export default function MiddlePanel() {
 
     async function handleLike(postId: number) {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/posts/${postId}/like`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/${postId}/like`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -93,7 +94,7 @@ export default function MiddlePanel() {
 
     async function handleComment(postId: number, comment: string) {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/posts/${postId}/comment`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/${postId}/comment`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -115,7 +116,7 @@ export default function MiddlePanel() {
             const post = feedPosts.find(p => p.id === postId);
             setSelectedPost(post || null);
 
-            const response = await fetch(`http://127.0.0.1:8000/posts/${postId}/comments`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/posts/${postId}/comments`, {
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
                 },

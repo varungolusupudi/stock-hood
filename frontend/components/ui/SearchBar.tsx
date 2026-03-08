@@ -21,7 +21,7 @@ export default function SearchBar() {
 
         const timer = setTimeout(async () => {
             // This only runs if user hasn't typed for 300 ms
-            const response = await fetch(`http://localhost:8000/stocks/search?q=${query}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stocks/search?q=${query}`);
             const data = await response.json();
             setResults(data.results);
         }, 300);

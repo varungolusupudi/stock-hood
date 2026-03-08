@@ -1,10 +1,12 @@
 "use client"
 
 import { FormEvent, useState } from "react"
+import { useRouter } from 'next/navigation'
 
 export default function RegisterForm() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const router = useRouter();
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -17,7 +19,7 @@ export default function RegisterForm() {
         const password_confirm = formData.get('password_confirm');
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/register', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -42,6 +44,9 @@ export default function RegisterForm() {
                 }
             } else {
                 setSuccess(data.message || "Account created successfully!");
+                const token = data.access_token;
+                localStorage.setItem("token", token); // Store the token!
+                router.push('/dashboard');
             }
 
             console.log("Response:", data);

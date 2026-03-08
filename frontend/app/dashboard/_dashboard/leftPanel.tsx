@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState,  useEffect, useRef } from "react";
 import { ChevronDown, Pencil} from 'lucide-react';
 
-export default function LeftPanel() {
+export default function LeftPanel({ onPostClick }: { onPostClick: () => void }) {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -61,7 +61,7 @@ export default function LeftPanel() {
                     </div>
 
                     {/* Post Button */}
-                    <button className="w-full mt-4 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-full font-bold transition-colors shadow-sm cursor-pointer">
+                    <button onClick={onPostClick} className="w-full mt-4 py-3 bg-stone-900 hover:bg-stone-800 text-white rounded-full font-bold transition-colors shadow-sm cursor-pointer">
                         <div className="flex justify-center items-center gap-2">
                             <Pencil className="w-4 h-4" />
                             <span>Post</span>

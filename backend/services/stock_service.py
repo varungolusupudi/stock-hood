@@ -22,7 +22,7 @@ def fetch_ticker(db, ticker: str):
             db_stock.company_name = info.get("longName")
             db_stock.current_price = info.get("currentPrice")
             db_stock.market_cap = info.get("marketCap")
-            db_stock.volume = info.get("volume"),
+            db_stock.volume = info.get("volume")
             db_stock.daily_change = info.get("regularMarketChangePercent")
         else:
             db_stock = Stock(

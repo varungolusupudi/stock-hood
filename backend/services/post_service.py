@@ -84,7 +84,22 @@ def create_post(data: CreatePostSchema, user: User, db: Session):
     db.commit()
     db.refresh(post)
 
-    return post
+    return {
+            "id": post.id,
+            "content": post.content,
+            "sentiment": post.sentiment,
+            "likes_count": post.likes_count,
+            "comments_count": post.comments_count,
+            "reposts_count": post.reposts_count,
+            "created_at": post.created_at,
+            "user_has_liked": False,
+            "author": {
+                "id": user.id,
+                "username": user.username,
+                "display_name": user.display_name,
+                "profile_image_url": user.profile_image_url
+            }
+        }
 
 def like_post(post_id: int, user: User, db: Session):
     post = db.query(Post).filter(Post.id == post_id).first()

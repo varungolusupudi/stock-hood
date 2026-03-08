@@ -31,7 +31,7 @@ export default function WatchList() {
 
     // Fetch watchlist on mount
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/watchlist", {
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
             }
@@ -56,7 +56,7 @@ export default function WatchList() {
         setIsSearching(true);
         const timer = setTimeout(async () => {
             try {
-                const response = await fetch(`http://localhost:8000/stocks/search?q=${searchQuery}`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}stocks/search?q=${searchQuery}`);
                 const data = await response.json();
                 setSearchResults(data.results || []);
             } catch (error) {
@@ -71,7 +71,7 @@ export default function WatchList() {
     }, [searchQuery]);
 
     const handleAddStock = (ticker: string) => {
-        fetch("http://127.0.0.1:8000/watchlist", {
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export default function WatchList() {
         .then(res => res.json())
         .then(() => {
             // Re-fetch watchlist
-            return fetch("http://127.0.0.1:8000/watchlist", {
+            return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
@@ -101,7 +101,7 @@ export default function WatchList() {
     }
 
     const handleRemoveStock = (ticker: string) => {
-        fetch(`http://127.0.0.1:8000/watchlist/${ticker}`, {
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist/${ticker}`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -109,7 +109,7 @@ export default function WatchList() {
         })
         .then(res => res.json())
         .then(() => {
-            return fetch("http://127.0.0.1:8000/watchlist", {
+            return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }

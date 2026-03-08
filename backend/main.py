@@ -93,8 +93,8 @@ def get_ticker(ticker: str, db: Session = Depends(get_db)):
     result = fetch_ticker(db, ticker)
     if not result["ok"]:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid stock or error fetching the stock",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Stock not found",
         )
     
     stock = result["stock"]
@@ -117,7 +117,7 @@ def get_posts(db: Session = Depends(get_db), current_user: User = Depends(get_cu
 def create_post(data: CreatePostSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         post = post_service.create_post(data, current_user, db)
-        return post
+        return {"post": post}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
