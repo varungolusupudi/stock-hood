@@ -103,6 +103,28 @@ def get_ticker(ticker: str, db: Session = Depends(get_db)):
         "stock": stock 
     }
 
+@app.get("/profile")
+def get_profile(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "user": user
+    }
+
+@app.get("/profile/{username}")
+def get_profile_by_username(username: str):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "user": user
+    }
+
+@app.put("/profile")
+def update_profile(data: UpdateProfileSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    pass
+
 @app.get("/posts")
 def get_posts(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
