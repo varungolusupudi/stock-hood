@@ -4,7 +4,7 @@ from auth import authenticate_user, register_user
 from services.stock_service import fetch_ticker, search_tickers
 from jwt_utils import create_access_token, get_current_user
 from database import get_db, engine
-from schemas import LoginSchema, RegisterSchema, CreatePostSchema, AddToWatchlistSchema
+from schemas import LoginSchema, RegisterSchema, CreatePostSchema, AddToWatchlistSchema, UpdateProfileSchema
 from sqlalchemy.orm import Session
 from models import Stock, User
 from services import post_service, user_watchlist_service
@@ -105,15 +105,13 @@ def get_ticker(ticker: str, db: Session = Depends(get_db)):
 
 @app.get("/profile")
 def get_profile(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    user = db.query(User).filter(User.id == current_user.id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     return {
-        "user": user
+        "user": current_user
     }
 
 @app.get("/profile/{username}")
-def get_profile_by_username(username: str):
+def get_profile_by_username(username: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Need to query the database for the user by username
     user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -121,9 +119,29 @@ def get_profile_by_username(username: str):
         "user": user
     }
 
-@app.put("/profile")
+@app.patch("/profile")
 def update_profile(data: UpdateProfileSchema, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    pass
+    if data.username is not None and data.username != current_user.username:
+        existing_username = db.query(User).filter(User.username == data.username).first()
+        if existing_username:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+    
+    if data.username is not None:
+        current_user.username = data.username
+    if data.display_name is not None:
+        current_user.display_name = data.display_name
+    if data.bio is not None:
+        current_user.bio = data.bio
+    if data.profile_image_url is not None:
+        current_user.profile_image_url = data.profile_image_url
+
+    db.commit()
+    db.refresh(current_user)
+
+    return {
+        "message": "Profile updated successfully",
+        "user": current_user
+    }
 
 @app.get("/posts")
 def get_posts(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

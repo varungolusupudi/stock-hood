@@ -83,3 +83,24 @@ class AddToWatchlistSchema(BaseModel):
     @classmethod
     def uppercase_ticker(cls, v):
         return v.upper()
+
+class UpdateProfileSchema(BaseModel):
+    username: Optional[str] = Field(None, min_length=3, max_length=50)
+    display_name: Optional[str] = Field(None, max_length=50)
+    bio: Optional[str] = Field(None, max_length=200)
+    profile_image_url: Optional[str] = None
+
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v):
+        if v is None:
+            return v
+
+        if v.strip() == '':
+            raise ValueError('Username cannot be empty')
+
+        if not re.match(r'^[a-zA-Z0-9_]+$', v):
+            raise ValueError('Username can only contain letters, numbers, and underscores')
+        
+        return v.lower()
+    
